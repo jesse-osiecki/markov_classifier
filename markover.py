@@ -43,35 +43,31 @@ class Markov(object):
                 self.cache[key] = [l[-1]]
     
     def score_text(self, text):
-        score = 0
-        trans_count = 0
+        score = 0.0
+        trans_made = 0.0
         #make sure text has at least one element
         text=text.split()
-        words = text[0:self.ngram_size] # the whole markov chain. E.g The, boy, is for a 3 len chain
-        key = words[:-1] # the key for the dictionaty. E.G. the, boy for a 3 chain
 
         for idx, t in enumerate(text):
-            prob = 0
+            words = text[0 + idx:self.ngram_size + idx] # the whole markov chain. E.g The, boy, is for a 3 len chain
+            key = words[:-1] # the key for the dictionaty. E.G. the, boy for a 3 chain
+            prob = 0.0
             val = [] # the values that correspond with the key
             try:
                 count = 0 # figure out how many occourances of the value are in the cache. Score accordingly
+                possible_transistions = 0.0
                 val = self.cache[tuple(key)]
                 for i in val:
+                    possible_transistions += 1
                     if i == words[-1]:
                         count += 1
-                prob = count / self.total_trans # the probability that a transition should happen is the # of times it does / the total possible transitions
+                prob = count / possible_transistions # the probability that a transition should happen is the # of times it does / the total possible transitions
             except KeyError:
                 prob = 0 # no score, words never seen before
-                print "No score"
-            #score += prob
-            #trans_count +=1
-            print words
-            print key
-            print prob
-            words = text[0 + idx:self.ngram_size + idx] # the whole markov chain. E.g The, boy, is for a 3 len chain
-            key = words[:-1] # the key for the dictionaty. E.G. the, boy for a 3 chain
+            score += prob
+            trans_made +=1
+        return score / (trans_made or 1)  # dont divide by zero so fear robot devil
 
-                
 
     def generate_markov_text(self, size=25):
         ran_key = random.choice(self.cache.keys())
